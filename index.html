@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Evaluación</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 800px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header h2 {
+            color: #666;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .login-form {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #6a11cb;
+            outline: none;
+        }
+
+        .error-message {
+            color: #ff4757;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        /* Estilos para la página de evaluación (inicialmente oculta) */
+        #evaluation-page {
+            display: none;
+        }
+
+        .question {
+            font-size: 1.4rem;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .rating {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+            gap: 5px;
+        }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #ddd;
+            transition: all 0.3s ease;
+        }
+
+        /* Efecto hover y selección CORREGIDO - funciona de izquierda a derecha */
+        .rating label:hover,
+        .rating label:hover~label {
+            color: #ddd !important;
+        }
+
+        .rating:hover label {
+            color: #ffc107;
+        }
+
+        .rating input:checked~label {
+            color: #ddd;
+        }
+
+        .rating input:checked+label,
+        .rating input:checked+label~label {
+            color: #ffc107;
+        }
+
+        .rating input:checked+label {
+            transform: scale(1.2);
+        }
+
+        .comments {
+            margin-bottom: 20px;
+        }
+
+        .comments textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            resize: none;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .comments textarea:focus {
+            border-color: #6a11cb;
+            outline: none;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-back {
+            background: #f0f0f0;
+            color: #555;
+        }
+
+        .rating-value {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #6a11cb;
+            font-size: 1.1rem;
+            min-height: 30px;
+        }
+
+        .rating-message {
+            margin-top: 5px;
+            font-style: italic;
+            color: #666;
+            min-height: 25px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header h2 {
+                font-size: 1.2rem;
+            }
+
+            .question {
+                font-size: 1.2rem;
+            }
+
+            .rating label {
+                width: 40px;
+                height: 40px;
+                font-size: 2rem;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .rating {
+                gap: 2px;
+            }
+
+            .rating label {
+                width: 35px;
+                height: 35px;
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Estilos para la página de error 404 */
+        .error-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #6a11cb;
+            margin-bottom: 10px;
+        }
+
+        .error-message-404 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .error-details {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .error-solutions {
+            text-align: left;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .error-solutions h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .error-solutions ul {
+            padding-left: 20px;
+        }
+
+        .error-solutions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Página de inicio de sesión -->
+    <div class="container" id="login-page">
+        <div class="header">
+            <h1>Página</h1>
+        </div>
+
+        <div class="login-form">
+            <div class="form-group">
+                <label for="username">Usuario:</label>
+                <input type="text" id="username" placeholder="Ingresa tu usuario">
+            </div>
+
+            <div class="form-group">
+                <label for="course">Curso:</label>
+                <select id="course">
+                    <option value="">Selecciona tu curso</option>
+                    <option value="1A">1A</option>
+                    <option value="1B">1B</option>
+                    <option value="1C">1C</option>
+                    <option value="1D">1D</option>
+                    <option value="2A">2A</option>
+                    <option value="2B">2B</option>
+                    <option value="2C">2C</option>
+                    <option value="2D">2D</option>
+                    <option value="3A">3A</option>
+                    <option value="3B">3B</option>
+                    <option value="3C">3C</option>
+                    <option value="3D">3D</option>
+                    <option value="4A">4A</option>
+                    <option value="4B">4B</option>
+                    <option value="4C">4C</option>
+                    <option value="4D">4D</option>
+                    <option value="4E">4E</option>
+                </select>
+                <div class="error-message" id="course-error">
+                    Por favor, selecciona un curso válido
+                </div>
+            </div>
+
+            <button class="btn" id="login-btn" disabled>Ingresar</button>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 - Todos los derechos reservados</p>
+        </div>
+    </div>
+
+    <!-- Página de evaluación (inicialmente oculta) -->
+    <div class="container" id="evaluation-page">
+        <div class="header">
+            <h1>Califícanos</h1>
+            <p>¡Valora tu experiencia con nosotros!</p>
+        </div>
+
+        <div class="evaluation">
+            <h2 class="question">¿QUÉ TE PARECIÓ ESTA EXPERIENCIA?</h2>
+
+            <div class="rating">
+                <!-- Orden de izquierda a derecha: 1, 2, 3, 4, 5 -->
+                <input type="radio" name="rating" id="star1" value="1">
+                <label for="star1"><i class="fas fa-star"></i></label>
+
+                <input type="radio" name="rating" id="star2" value="2">
+                <label for="star2"><i class="fas fa-star"></i></label>
+
+                <input type="radio" name="rating" id="star3" value="3">
+                <label for="star3"><i class="fas fa-star"></i></label>
+
+                <input type="radio" name="rating" id="star4" value="4">
+                <label for="star4"><i class="fas fa-star"></i></label>
+
+                <input type="radio" name="rating" id="star5" value="5">
+                <label for="star5"><i class="fas fa-star"></i></label>
+            </div>
+
+            <div class="rating-value" id="rating-text">Selecciona una calificación</div>
+            <div class="rating-message" id="rating-message"></div>
+
+            <div class="comments">
+                <textarea placeholder="Comparte tus comentarios adicionales..."></textarea>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-back" id="back-btn">Volver</button>
+                <button class="btn" id="submit-btn">Enviar evaluación</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 - Todos los derechos reservados</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginBtn = document.getElementById('login-btn');
+            const backBtn = document.getElementById('back-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            const loginPage = document.getElementById('login-page');
+            const evaluationPage = document.getElementById('evaluation-page');
+            const ratingInputs = document.querySelectorAll('input[name="rating"]');
+            const ratingText = document.getElementById('rating-text');
+            const ratingMessage = document.getElementById('rating-message');
+            const textarea = document.querySelector('textarea');
+            const usernameInput = document.getElementById('username');
+            const courseSelect = document.getElementById('course');
+            const courseError = document.getElementById('course-error');
+            const ratingContainer = document.querySelector('.rating');
+
+            // Lista de cursos válidos
+            const validCourses = ['1A', '1B', '1C', '1D', '2A', '2B', '2C', '2D', '3A', '3B', '3C', '3D', '4A', '4B', '4C', '4D', '4E'];
+
+            // Mensajes según la calificación
+            const ratingMessages = {
+                1: "Muy mala experiencia",
+                2: "Experiencia regular",
+                3: "Experiencia aceptable",
+                4: "Buena experiencia",
+                5: "¡Excelente experiencia!"
+            };
+
+            // Alertas según la calificación
+            const ratingAlerts = {
+                1: "Lamentamos que tu experiencia no haya sido buena. ¿Podrías contarnos más en los comentarios para mejorar?",
+                2: "Agradecemos tu feedback. Nos esforzaremos para mejorar.",
+                3: "Gracias por tu evaluación. Seguiremos trabajando para mejorar.",
+                4: "¡Nos alegra que hayas tenido una buena experiencia!",
+                5: "¡Excelente! Nos encanta saber que tuviste una experiencia maravillosa."
+            };
+
+            // Actualizar texto de calificación
+            function updateRatingText() {
+                let selectedRating = 0;
+                for (const radio of ratingInputs) {
+                    if (radio.checked) {
+                        selectedRating = radio.value;
+                        break;
+                    }
+                }
+
+                if (selectedRating > 0) {
+                    ratingText.textContent = `Calificación: ${selectedRating}/5`;
+                    ratingMessage.textContent = ratingMessages[selectedRating];
+                } else {
+                    ratingText.textContent = "Selecciona una calificación";
+                    ratingMessage.textContent = "";
+                }
+            }
+
+            // Habilitar/deshabilitar botón de ingreso
+            function toggleLoginButton() {
+                const username = usernameInput.value.trim();
+                const course = courseSelect.value;
+
+                if (username && validCourses.includes(course)) {
+                    loginBtn.disabled = false;
+                } else {
+                    loginBtn.disabled = true;
+                }
+            }
+
+            // Validar curso
+            function validateCourse() {
+                const course = courseSelect.value;
+
+                if (course && !validCourses.includes(course)) {
+                    courseError.style.display = 'block';
+                    loginBtn.disabled = true;
+                } else {
+                    courseError.style.display = 'none';
+                    toggleLoginButton();
+                }
+            }
+
+            // Event listeners para validación en tiempo real
+            usernameInput.addEventListener('input', toggleLoginButton);
+            courseSelect.addEventListener('change', function () {
+                validateCourse();
+                toggleLoginButton();
+            });
+
+            // Event listeners para las estrellas
+            ratingInputs.forEach(input => {
+                input.addEventListener('change', updateRatingText);
+            });
+
+            // Mejorar la experiencia de hover para las estrellas
+            const starLabels = document.querySelectorAll('.rating label');
+            starLabels.forEach((label, index) => {
+                label.addEventListener('mouseover', function () {
+                    // Colorear todas las estrellas hasta esta
+                    for (let i = 0; i <= index; i++) {
+                        starLabels[i].style.color = '#ffc107';
+                    }
+                    // Descolorear las estrellas después de esta
+                    for (let i = index + 1; i < starLabels.length; i++) {
+                        starLabels[i].style.color = '#ddd';
+                    }
+                });
+
+                label.addEventListener('mouseout', function () {
+                    // Restaurar colores según selección actual
+                    const selectedIndex = getSelectedIndex();
+                    if (selectedIndex >= 0) {
+                        for (let i = 0; i < starLabels.length; i++) {
+                            starLabels[i].style.color = i <= selectedIndex ? '#ffc107' : '#ddd';
+                        }
+                    } else {
+                        for (let i = 0; i < starLabels.length; i++) {
+                            starLabels[i].style.color = '#ddd';
+                        }
+                    }
+                });
+            });
+
+            // Obtener índice de la estrella seleccionada
+            function getSelectedIndex() {
+                for (let i = 0; i < ratingInputs.length; i++) {
+                    if (ratingInputs[i].checked) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+
+            // Función para ingresar (mostrar evaluación)
+            loginBtn.addEventListener('click', function () {
+                const username = usernameInput.value.trim();
+                const course = courseSelect.value;
+
+                if (!username || !validCourses.includes(course)) {
+                    alert('Por favor, ingresa un usuario y selecciona un curso válido');
+                    return;
+                }
+
+                // Ocultar login y mostrar evaluación
+                loginPage.style.display = 'none';
+                evaluationPage.style.display = 'block';
+            });
+
+            // Volver a la página de login
+            backBtn.addEventListener('click', function () {
+                evaluationPage.style.display = 'none';
+                loginPage.style.display = 'block';
+            });
+
+            // Enviar evaluación
+            submitBtn.addEventListener('click', function () {
+                let selectedRating = 0;
+                for (const radio of ratingInputs) {
+                    if (radio.checked) {
+                        selectedRating = radio.value;
+                        break;
+                    }
+                }
+
+                if (selectedRating === 0) {
+                    alert('Por favor, selecciona una calificación antes de enviar.');
+                    return;
+                }
+
+                // Mostrar alerta según la calificación seleccionada
+                alert(ratingAlerts[selectedRating]);
+
+                // Reset form
+                for (const radio of ratingInputs) {
+                    radio.checked = false;
+                }
+                textarea.value = '';
+                ratingText.textContent = "Selecciona una calificación";
+                ratingMessage.textContent = "";
+
+                // Restablecer colores de estrellas
+                starLabels.forEach(label => {
+                    label.style.color = '#ddd';
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
